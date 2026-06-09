@@ -36,7 +36,7 @@ jobs:
         with:
           go-version-file: ./geodat2srs/go.mod
 
-      - name: Collect files
+      - name: Collect files and compile Mihomo MRS
         run: |
           mkdir -p ./publish
           curl -sSL $GEOIP_URL > ./publish/geoip.dat
@@ -44,6 +44,33 @@ jobs:
           
           curl -sSL $GEOSITE_URL > ./publish/geosite.dat
           curl -sSL $GEOSITE_URL.sha256sum > ./publish/geosite.dat.sha256sum
+
+          curl -sSL https://github.com/MetaCubeX/mihomo/releases/download/v1.19.9/mihomo-linux-amd64-v1.19.9.gz | gunzip > mihomo
+          chmod +x mihomo
+
+          mkdir -p ./tmp_txt
+          for list in ru-blocked-self nnymph-ru-blocked-self nnymph-proxy ru-available-only-inside nnymph-direct nnymph-block twitch-blocked; do
+            curl -sSL "https://${{ secrets.PAT_TOKEN }}@raw.githubusercontent.com/nnymph/v2ray-ru-blocked-geosite/release/${list}" > "./tmp_txt/${list}" || true
+          done
+
+          echo "payload:" > ./publish/nnymph-proxy.yaml
+          cat ./tmp_txt/ru-blocked-self ./tmp_txt/nnymph-ru-blocked-self ./tmp_txt/nnymph-proxy 2>/dev/null | grep -v -E '^(#|$)' | sort -u | sed 's/^/  - /' >> ./publish/nnymph-proxy.yaml
+          
+          echo "payload:" > ./publish/nnymph-direct.yaml
+          cat ./tmp_txt/ru-available-only-inside ./tmp_txt/nnymph-direct 2>/dev/null | grep -v -E '^(#|$)' | sort -u | sed 's/^/  - /' >> ./publish/nnymph-direct.yaml
+
+          echo "payload:" > ./publish/nnymph-block.yaml
+          cat ./tmp_txt/nnymph-block 2>/dev/null | grep -v -E '^(#|$)' | sort -u | sed 's/^/  - /' >> ./publish/nnymph-block.yaml
+
+          echo "payload:" > ./publish/nnymph-twitch.yaml
+          cat ./tmp_txt/twitch-blocked 2>/dev/null | grep -v -E '^(#|$)' | sort -u | sed 's/^/  - /' >> ./publish/nnymph-twitch.yaml
+
+          for list in nnymph-proxy nnymph-direct nnymph-block nnymph-twitch; do
+            ./mihomo convert-ruleset domain yaml "./publish/${list}.yaml" "./publish/${list}.mrs"
+          done
+          
+          rm -rf ./tmp_txt
+          rm -f ./publish/*.yaml
 
       - name: Generate sing-box srs
         run: |
