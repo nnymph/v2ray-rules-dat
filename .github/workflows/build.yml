@@ -4,11 +4,6 @@ on:
   schedule:
     # Запуск в 13:00 MSK (10:00 UTC) каждый день
     - cron: "0 10 * * *"
-  push:
-    branches:
-      - main
-    paths-ignore:
-      - "**/README.md"
 
 jobs:
   build:
