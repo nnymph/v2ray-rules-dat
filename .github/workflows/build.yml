@@ -45,6 +45,9 @@ jobs:
             curl -sSL "https://${{ secrets.PAT_TOKEN }}@raw.githubusercontent.com/nnymph/v2ray-ru-blocked-geosite/release/${list}.mrs" > "./publish/${list}.mrs"
           done
 
+          # Скачиваем готовый discord-ips.mrs из релиза geoip
+          curl -sSL "https://${{ secrets.PAT_TOKEN }}@raw.githubusercontent.com/nnymph/v2ray-ru-blocked-geoip/release/discord-ips.mrs" > "./publish/discord-ips.mrs"
+
       - name: Generate sing-box srs
         run: |
           go build -C geodat2srs ./
