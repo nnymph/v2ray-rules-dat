@@ -41,7 +41,7 @@ jobs:
           curl -sSL $GEOSITE_URL.sha256sum > ./publish/geosite.dat.sha256sum
 
           # Скачиваем готовые MRS из релиза geosite
-          for list in nnymph-proxy nnymph-direct nnymph-block nnymph-twitch; do
+          for list in nnymph-proxy nnymph-direct nnymph-block nnymph-twitch category-ban-ru; do
             curl -sSL "https://${{ secrets.PAT_TOKEN }}@raw.githubusercontent.com/nnymph/v2ray-ru-blocked-geosite/release/${list}.mrs" > "./publish/${list}.mrs"
           done
 
